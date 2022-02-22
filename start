@@ -1,0 +1,33 @@
+#!/bin/bash
+chainstate="$(ls /lynx/data/chainstate | wc -l)"
+blocks="$(ls /lynx/data/blocks | wc -l)"
+
+echo "Bootstraping blockchain data..."
+
+if [[ $chainstate -le 0 ]]; then
+    wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/chainstate.tar.gz -P /tmp -q --show-progress --progress=bar:force
+    echo "Unpacking chain state..."
+    tar -xzf /tmp/chainstate.tar.gz -C /lynx/data
+    rm /tmp/chainstate.tar.gz
+fi
+
+if [[ $blocks -le 0 ]]; then
+    wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/blocks.tar.gz -P /tmp -q --show-progress --progress=bar:force
+    echo "Unpacking blocks..."
+    tar -xzf /tmp/blocks.tar.gz -C /lynx/data
+    rm /tmp/blocks.tar.gz
+fi
+
+echo "Blockchain initialized."
+
+echo "Starting Lynx..."
+
+if [ -z $tipsyId ]; then
+    sed -i "/tipsyid/c\tipsyid=$tipsyid" /lynx/lynx.conf
+else
+    sed -i '/tipsyid/c\#tipsyid=0#' /lynx/lynx.conf
+fi
+
+[[ -f /lynx/data/debug.log ]] || touch /lynx/data/debug.log
+tail -f /lynx/data/debug.log &
+lynxd -daemon=0 -conf=/lynx/lynx.conf -debuglogfile=/lynx/data/debug.log -reindex -txindex
