@@ -5,23 +5,34 @@ echo "--------------------------------------------------------------------------
 echo "Lynx-Docker: Image by https://oscarrc.me"
 echo "---------------------------------------------------------------------------"
 
-sleep 10
+sleep 5
 
 echo "SETTING CONFIGURATION"
 echo "---------------------------------------------------------------------------"
 
+# Checks if the device is Raspberry Pi
+[ "$(grep 'Revision' /proc/cpuinfo)" != "" ] && isPi="1" || isPi="0"
+
+# Sets default configuration file
+if [[ isPi -eq 1 ]]; then
+    echo "Lynx-Docker: Raspberry Pi detected"
+    configfile="/etc/lynx/lynx-pi.conf"
+else
+    configfile="/etc/lynx/lynx.conf"
+fi
+
 # Checks for config file and sets it, otherwise it will use the default
-configfile="/etc/lynx/lynx.conf"
-datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
+datadir="/lynx" # Default datadir
 
 if [[ -f "${datadir}/lynx.conf" ]]; then
-    datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
     configfile="${datadir}/lynx.conf"
-    mkdir -p ${datadir}
     echo "Lynx-Docker: Using custom config file."
 else
     echo "Lynx-Docker: No config file found. Starting Lynx with default config."
 fi
+
+# Datadir from config file
+datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
 
 echo "---------------------------------------------------------------------------"
 echo "BOOTSTRAPING BLOCKCHAIN DATA"
@@ -54,44 +65,30 @@ if [[ isBootstrap -ne 0 ]]; then
     while IFS= read -r line; do
         hash=$(echo "$line" | cut -d ":" -f 1)
         file=$(echo "$line" | cut -d ":" -f 2)
-        
-        if [ ! -f "/tmp/$file" ]; then
-            wget "${bootstrap}/${file}" -P /tmp -q --show-progress --progress=bar:force:noscroll
+
+        if [ -f "/tmp/$file" ]; then
+            rm -rf "/tmp/$file"
         fi
+
+        wget "${bootstrap}/${file}" -P /tmp -q --show-progress --progress=bar:force:noscroll
+
         if [ "$(sha256sum "/tmp/${file}" | awk '{print $1}')" = "$hash" ]; then
-            sleep 1
+            echo "Lynx-Docker: Sanity check - $file hash matches."
         else
-            rm -rf "$file"
-            wget "${bootstrap}/${file}" -P /tmp -q --show-progress --progress=bar:force:noscroll
-            if [ "$(sha256sum "/tmp/${file}" | awk '{print $1}')" = "$hash" ]; then
-                echo "Lynx-Docker: Sanity check - $file hash match $hash"
-            else
-                echo "Lynx-Docker: Corrupt bootstrap file"
-                exit
-            fi
+            echo "Lynx-Docker: Corrupt bootstrap file"
+            exit
         fi
     done < $datadir/manifest.txt
 
     # Uncompress them
-    cat /tmp/*blocks.tar.gz.* | gunzip | (rm -rf $datadir/blocks && mkdir -p $datadir/blocks && tar -xf -C $datadir/blocks -)
-    cat /tmp/*chainstate.tar.gz.* | gunzip | (rm -rf $datadir/chainstate && mkdir -p $datadir/chainstate && tar -xf -C $datadir/chainstate -)
+    echo "Lynx-Docker: Extracting files..."
+    cat /tmp/*blocks.tar.gz.* | gunzip | (rm -rf $datadir/blocks && mkdir -p $datadir/blocks && cd $datadir/blocks && tar xf -)
+    cat /tmp/*chainstate.tar.gz.* | gunzip | (rm -rf $datadir/chainstate && mkdir -p $datadir/chainstate && cd $datadir/chainstate && tar xf -)
+
+    echo "Lynx-Docker: Bootstrap complete."
 else
     echo "Lynx-Docker: Bootstrap disabled. Skipping."
 fi
-
-# if [[ $chainstate -le 0 ]]; then
-#     wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/chainstate.tar.gz -P /tmp -q --show-progress --progress=bar:force:noscroll
-#     echo "Unpacking chain state..."
-#     tar -xzf /tmp/chainstate.tar.gz -C $datadir
-# fi
-
-# if [[ $blocks -le 0 ]]; then
-#     wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/blocks.tar.gz -P /tmp -q --show-progress --progress=bar:force:noscroll
-#     echo "Unpacking blocks..."
-#     tar -xzf /tmp/blocks.tar.gz -C $datadir
-# fi
-
-echo "Done."
 
 echo "---------------------------------------------------------------------------"
 echo "CLEANING UP"

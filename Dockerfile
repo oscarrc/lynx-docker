@@ -1,4 +1,5 @@
 FROM ubuntu:latest
+ARG arch=linux64
 RUN apt update && \
     apt install wget tar libssl-dev ca-certificates cron libpopt0 logrotate --no-install-recommends -y && \
     apt clean && \
@@ -6,13 +7,14 @@ RUN apt update && \
     usermod -aG sudo lynx && \
     rm -rf /var/lib/apt/lists/*
 RUN su lynx && \
-    wget https://github.com/getlynx/Lynx/releases/download/v0.16.3.12/lynx-linux64-wallet-0.16.3.12.tar.gz -P /tmp && \
-    tar -zxvf /tmp/lynx-linux64-wallet-0.16.3.12.tar.gz -C /tmp && \
-    mv /tmp/lynx-linux64-wallet-0.16.3.12/* /usr/local/bin && \
+    wget https://github.com/getlynx/Lynx/releases/download/v0.16.3.12/lynx-$arch-wallet-0.16.3.12.tar.gz -P /tmp && \
+    tar -zxvf "/tmp/lynx-${arch}-wallet-0.16.3.12.tar.gz" -C /tmp && \
+    mv /tmp/lynx-$arch-wallet-0.16.3.12/* /usr/local/bin && \
     mkdir /etc/lynx/ /lynx && \
     rm -rf /tmp/*
 ADD lynx-start /usr/local/bin/lynx-start 
 ADD lynx.conf /etc/lynx/lynx.conf
+ADD lynx-pi.conf /etc/lynx/lynx-pi.conf
 ADD logrotate /etc/logrotate.d/lynx
 RUN chown lynx:lynx /usr/local/bin/lynx* && \
     chown lynx:lynx /lynx && \
