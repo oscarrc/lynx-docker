@@ -1,0 +1,10 @@
+/lynx/debug.log {
+    su lynx lynx
+    daily
+    rotate 7
+    size 10M
+    copytruncate
+    compress
+    notifempty
+    missingok
+}

@@ -2,7 +2,17 @@
 chainstate="$(ls /lynx/chainstate | wc -l)"
 blocks="$(ls /lynx/blocks | wc -l)"
 
-echo "Bootstraping blockchain data..."
+echo "LYNX DOCKER"
+echo "----------------------------------------"
+echo "Docker image by https://oscarrc.me"
+echo "If you like it please consider donating:"
+echo "https://ko-fi.com/oscarrc"
+echo "----------------------------------------"
+
+sleep 10
+
+echo "BOOTSTRAPING BLOCKCHAIN DATA"
+echo "----------------------------------------"
 
 if [[ $chainstate -le 0 ]]; then
     wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/chainstate.tar.gz -P /tmp -q --show-progress --progress=bar:force
@@ -18,18 +28,22 @@ if [[ $blocks -le 0 ]]; then
     rm /tmp/blocks.tar.gz
 fi
 
-echo "Blockchain initialized."
+echo "----------------------------------------"
+
+echo "STARTING LYNX"
+
+echo "----------------------------------------"
 
 [[ -f /lynx/debug.log ]] || touch /lynx/debug.log
 tail -f /lynx/debug.log &
 
-if [[ -f /lynx/lynx.conf ]]; then    
-    echo "Starting Lynx."
+if [[ -f /lynx/lynx.conf ]]; then
     lynxd -conf=/lynx/lynx.conf
 else
     echo "No config file found. Starting Lynx with default config."
     lynxd -conf=/etc/lynx/lynx.conf
 fi
 
-echo "Lynx started."
+echo "----------------------------------------"
+echo "DONE. HAVE FUN!"
 
