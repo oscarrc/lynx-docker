@@ -35,8 +35,8 @@ currentDate="$(date +%F)"
 
 if [[ isTestnet -eq 1 ]]; then
     echo "Testnet detected. Starting with testnet data."
-    mkdir -p "$datadir/testnet4"
-    datadir="$datadir/testnet4"
+    mkdir -p "$datadir/testnet"
+    datadir="$datadir/testnet"
     chainstate="$(ls ${datadir}/chainstate | wc -l)"
     blocks="$(ls ${datadir}/blocks | wc -l)"
 fi
