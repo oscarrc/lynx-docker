@@ -52,8 +52,8 @@ if [[ isTestnet -eq 1 ]]; then
     mkdir -p "$datadir/$testrelease"
     datadir="$datadir/$testrelease"
     bootstrap="https://github.com/getlynx/LynxBootstrap/releases/download/$testrelease"
-    chainstate="$(ls ${datadir}/chainstate | wc -l)"
-    blocks="$(ls ${datadir}/blocks | wc -l)"
+    chainstate="$(ls ${datadir}/chainstate 2> /dev/null | wc -l)"
+    blocks="$(ls ${datadir}/blocks 2> /dev/null | wc -l)"
 fi
 
 # If bootstrap enabled, then bootstrap
