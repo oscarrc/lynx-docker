@@ -1,9 +1,10 @@
 FROM ubuntu:latest
 RUN apt update && \
-    apt install wget tar cron -y && \
+    apt install wget tar cron libssl-dev ca-certificates --no-install-recommends -y && \
     apt clean && \
     useradd lynx && \
-    usermod -aG sudo lynx    
+    usermod -aG sudo lynx && \
+    rm -rf /var/lib/apt/lists/*
 RUN su lynx && \
     wget https://github.com/getlynx/Lynx/releases/download/v0.16.3.11/lynx-linux64-wallet-0.16.3.11.tar.gz -P /tmp && \
     tar -zxvf /tmp/lynx-linux64-wallet-0.16.3.11.tar.gz -C /tmp && \
