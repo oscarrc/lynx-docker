@@ -17,6 +17,7 @@ datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
 if [[ -f "${datadir}/lynx.conf" ]]; then
     datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
     configfile="${datadir}/lynx.conf"
+    mkdir -p ${datadir}
     echo "Lynx-Docker: Using custom config file."
 else
     echo "Lynx-Docker: No config file found. Starting Lynx with default config."
@@ -36,8 +37,8 @@ currentDate="$(date +%F)"
 # If testnet enabled, then set variables accordingly
 if [[ isTestnet -eq 1 ]]; then
     echo "Lynx-Docker: Testnet enabled. Starting with testnet data."
-    mkdir -p "$datadir/testnet4"
-    datadir="$datadir/testnet4"
+    mkdir -p "$datadir/$testrelease"
+    datadir="$datadir/$testrelease"
     bootstrap="https://github.com/getlynx/LynxBootstrap/releases/download/$testrelease"
     chainstate="$(ls ${datadir}/chainstate | wc -l)"
     blocks="$(ls ${datadir}/blocks | wc -l)"
@@ -72,8 +73,8 @@ if [[ isBootstrap -ne 0 ]]; then
     done < $datadir/manifest.txt
 
     # Uncompress them
-    cat ./*blocks.tar.gz.* | gunzip | (rm -rf $datadir/blocks && mkdir -p $datadir/blocks -xf -C $datadir/chainstate -)
-    cat ./*chainstate.tar.gz.* | gunzip | (rm -rf $datadir/chainstate && mkdir -p $datadir/chainstate && tar -xf -C $datadir/chainstate -)
+    cat /tmp/*blocks.tar.gz.* | gunzip | (rm -rf $datadir/blocks && mkdir -p $datadir/blocks && tar -xf -C $datadir/blocks -)
+    cat /tmp/*chainstate.tar.gz.* | gunzip | (rm -rf $datadir/chainstate && mkdir -p $datadir/chainstate && tar -xf -C $datadir/chainstate -)
 else
     echo "Lynx-Docker: Bootstrap disabled. Skipping."
 fi
@@ -103,8 +104,6 @@ echo "STARTING LYNX"
 echo "---------------------------------------------------------------------------"
 
 # Check if log file exists, if not create it
-echo "$datadir"
-echo "$(ls -alh $datadir)"
 [[ -f "${datadir}/debug.log" ]] || touch $datadir/debug.log
 
 # Show log on stdout
@@ -113,6 +112,6 @@ echo "Lynx-Docker: Done. HAVE FUN!"
 sleep 1
 
 # Start Lynx using config file
-lynxd -conf=$configfile
+lynxd -conf=$configfile -datadir=$datadir
 
 echo "---------------------------------------------------------------------------" 
