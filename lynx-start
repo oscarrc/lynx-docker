@@ -1,7 +1,4 @@
 #!/bin/bash
-chainstate="$(ls /lynx/chainstate | wc -l)"
-blocks="$(ls /lynx/blocks | wc -l)"
-
 echo "LYNX DOCKER"
 echo "----------------------------------------"
 echo "Docker image by https://oscarrc.me"
@@ -11,39 +8,55 @@ echo "----------------------------------------"
 
 sleep 10
 
+echo "SETTING CONFIGURATION"
+echo "----------------------------------------"
+
+configfile = "/etc/lynx/lynx.conf"
+datadir = "/lynx"
+
+if [[ -f /lynx/lynx.conf ]]; then
+    $configfile = "/$datadir/lynx.conf"
+else
+    echo "No config file found. Starting Lynx with default config."
+fi
+
+echo "----------------------------------------"
 echo "BOOTSTRAPING BLOCKCHAIN DATA"
 echo "----------------------------------------"
+
+isTestnet = "$(grep -i "^ *testnet *= *1" $configfile)"
+chainstate="$(ls /$datadir/chainstate 2> /dev/null | wc -l)"
+blocks="$(ls /$datadir/blocks 2> /dev/null | wc -l)"
+currentDate="$(date +%F)"
+
+if [[ isTestnet ]]; then
+    echo "Testnet detected. Starting with testnet data."
+    $datadir = "/lynx/testnet4"
+    $chainstate="$(ls /$datadir/chainstate | wc -l)"
+    $blocks="$(ls /$datadir/blocks | wc -l)"
+fi
 
 if [[ $chainstate -le 0 ]]; then
     wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/chainstate.tar.gz -P /tmp -q --show-progress --progress=bar:force
     echo "Unpacking chain state..."
-    tar -xzf /tmp/chainstate.tar.gz -C /lynx
-    rm /tmp/chainstate.tar.gz
+    mkdir -p $datadir && tar -xzf /tmp/chainstate.tar.gz -C $datadir
 fi
 
 if [[ $blocks -le 0 ]]; then
     wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/blocks.tar.gz -P /tmp -q --show-progress --progress=bar:force
     echo "Unpacking blocks..."
-    tar -xzf /tmp/blocks.tar.gz -C /lynx
-    rm /tmp/blocks.tar.gz
+    mkdir -p $datadir && tar -xzf /tmp/blocks.tar.gz -C $datadir
 fi
 
+sudo rm -rf /tmp/*
+
 echo "----------------------------------------"
-
 echo "STARTING LYNX"
-
 echo "----------------------------------------"
 
 [[ -f /lynx/debug.log ]] || touch /lynx/debug.log
 tail -f /lynx/debug.log &
-
-if [[ -f /lynx/lynx.conf ]]; then
-    lynxd -conf=/lynx/lynx.conf
-else
-    echo "No config file found. Starting Lynx with default config."
-    lynxd -conf=/etc/lynx/lynx.conf
-fi
+lynxd -conf=$configfile
 
 echo "----------------------------------------"
 echo "DONE. HAVE FUN!"
-
