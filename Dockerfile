@@ -8,7 +8,8 @@ RUN apt update && \
 RUN su lynx && \
     wget https://github.com/getlynx/Lynx/releases/download/v0.16.3.11/lynx-linux64-wallet-0.16.3.11.tar.gz -P /tmp && \
     tar -zxvf /tmp/lynx-linux64-wallet-0.16.3.11.tar.gz -C /tmp && \
-    mv /tmp/lynx-linux64-wallet-0.16.3.11/* /usr/local/bin
+    mv /tmp/lynx-linux64-wallet-0.16.3.11/* /usr/local/bin && \
+    rm -rf /tmp/*
 ADD lynx-start /usr/local/bin/lynx-start 
 ADD lynx.conf /etc/lynx/lynx.conf
 ADD logrotate /etc/logrotate.d/lynx
