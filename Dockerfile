@@ -1,6 +1,5 @@
 FROM ubuntu:latest
 RUN apt update && \
-    apt upgrade -y && \
     apt install wget tar cron -y && \
     apt clean && \
     useradd lynx && \
