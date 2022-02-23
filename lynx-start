@@ -1,67 +1,118 @@
 #!/bin/bash
 
 echo "LYNX DOCKER"
-echo "----------------------------------------"
-echo "Docker image by https://oscarrc.me"
-echo "If you like it please consider donating:"
-echo "https://ko-fi.com/oscarrc"
-echo "----------------------------------------"
+echo "---------------------------------------------------------------------------"
+echo "Lynx-Docker: Image by https://oscarrc.me"
+echo "---------------------------------------------------------------------------"
 
 sleep 10
 
 echo "SETTING CONFIGURATION"
-echo "----------------------------------------"
+echo "---------------------------------------------------------------------------"
 
+# Checks for config file and sets it, otherwise it will use the default
 configfile="/etc/lynx/lynx.conf"
 datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
 
 if [[ -f "${datadir}/lynx.conf" ]]; then
     datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
     configfile="${datadir}/lynx.conf"
+    echo "Lynx-Docker: Using custom config file."
 else
-    echo "No config file found. Starting Lynx with default config."
+    echo "Lynx-Docker: No config file found. Starting Lynx with default config."
 fi
 
-echo "DONE."
-
-echo "----------------------------------------"
+echo "---------------------------------------------------------------------------"
 echo "BOOTSTRAPING BLOCKCHAIN DATA"
-echo "----------------------------------------"
+echo "---------------------------------------------------------------------------"
 
 isTestnet="$(grep -i "^ *testnet=1" ${configfile} | cut -d '=' -f2)"
+isBootstrap="$(grep -i "^ *bootstrap=1" ${configfile} | cut -d '=' -f2)"
+bootstrap="https://github.com/getlynx/LynxBootstrap/releases/download/$release"
 chainstate="$(ls ${datadir}/chainstate 2> /dev/null | wc -l)"
 blocks="$(ls ${datadir}/blocks 2> /dev/null | wc -l)"
 currentDate="$(date +%F)"
 
+# If testnet enabled, then set variables accordingly
 if [[ isTestnet -eq 1 ]]; then
-    echo "Testnet detected. Starting with testnet data."
-    mkdir -p "$datadir/testnet"
-    datadir="$datadir/testnet"
+    echo "Lynx-Docker: Testnet enabled. Starting with testnet data."
+    mkdir -p "$datadir/testnet4"
+    datadir="$datadir/testnet4"
+    bootstrap="https://github.com/getlynx/LynxBootstrap/releases/download/$testrelease"
     chainstate="$(ls ${datadir}/chainstate | wc -l)"
     blocks="$(ls ${datadir}/blocks | wc -l)"
 fi
 
-if [[ $chainstate -le 0 ]]; then
-    wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/chainstate.tar.gz -P /tmp -q --show-progress --progress=bar:force
-    echo "Unpacking chain state..."
-    tar -xzf /tmp/chainstate.tar.gz -C $datadir
+# If bootstrap enabled, then bootstrap
+if [[ isBootstrap -ne 0 ]]; then
+    rm -rf $datadir/manifest.txt # Remove old manifest
+    wget -q $bootstrap/manifest.txt -P $datadir # Download new manifest
+    sed -i 's/  /:/' $datadir/manifest.txt # Clean manifest
+
+    # Download bootstrap files
+    while IFS= read -r line; do
+        hash=$(echo "$line" | cut -d ":" -f 1)
+        file=$(echo "$line" | cut -d ":" -f 2)
+        
+        if [ ! -f "/tmp/$file" ]; then
+            wget "${bootstrap}/${file}" -P /tmp -q --show-progress --progress=bar:force:noscroll
+        fi
+        if [ "$(sha256sum "/tmp/${file}" | awk '{print $1}')" = "$hash" ]; then
+            sleep 1
+        else
+            rm -rf "$file"
+            wget "${bootstrap}/${file}" -P /tmp -q --show-progress --progress=bar:force:noscroll
+            if [ "$(sha256sum "/tmp/${file}" | awk '{print $1}')" = "$hash" ]; then
+                echo "Lynx-Docker: Sanity check - $file hash match $hash"
+            else
+                echo "Lynx-Docker: Corrupt bootstrap file"
+                exit
+            fi
+        fi
+    done < $datadir/manifest.txt
+
+    # Uncompress them
+    cat ./*blocks.tar.gz.* | gunzip | (rm -rf $datadir/blocks && mkdir -p $datadir/blocks -xf -C $datadir/chainstate -)
+    cat ./*chainstate.tar.gz.* | gunzip | (rm -rf $datadir/chainstate && mkdir -p $datadir/chainstate && tar -xf -C $datadir/chainstate -)
+else
+    echo "Lynx-Docker: Bootstrap disabled. Skipping."
 fi
 
-if [[ $blocks -le 0 ]]; then
-    wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/blocks.tar.gz -P /tmp -q --show-progress --progress=bar:force
-    echo "Unpacking blocks..."
-    tar -xzf /tmp/blocks.tar.gz -C $datadir
-fi
+# if [[ $chainstate -le 0 ]]; then
+#     wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/chainstate.tar.gz -P /tmp -q --show-progress --progress=bar:force:noscroll
+#     echo "Unpacking chain state..."
+#     tar -xzf /tmp/chainstate.tar.gz -C $datadir
+# fi
 
-echo "DONE."
+# if [[ $blocks -le 0 ]]; then
+#     wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/blocks.tar.gz -P /tmp -q --show-progress --progress=bar:force:noscroll
+#     echo "Unpacking blocks..."
+#     tar -xzf /tmp/blocks.tar.gz -C $datadir
+# fi
 
-echo "----------------------------------------"
+echo "Done."
+
+echo "---------------------------------------------------------------------------"
+echo "CLEANING UP"
+echo "---------------------------------------------------------------------------"
+rm -rf /tmp/*
+echo "Lynx-Docker: Done."
+
+echo "---------------------------------------------------------------------------"
 echo "STARTING LYNX"
-echo "----------------------------------------"
+echo "---------------------------------------------------------------------------"
 
+# Check if log file exists, if not create it
+echo "$datadir"
+echo "$(ls -alh $datadir)"
 [[ -f "${datadir}/debug.log" ]] || touch $datadir/debug.log
+
+# Show log on stdout
 tail -f $datadir/debug.log &
-echo "DONE. HAVE FUN!"
+echo "Lynx-Docker: Done. HAVE FUN!"
+sleep 1
+
+# Start Lynx using config file
 lynxd -conf=$configfile
 
-echo "----------------------------------------"
+echo "---------------------------------------------------------------------------" 
