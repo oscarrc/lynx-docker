@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "LYNX DOCKER"
 echo "----------------------------------------"
 echo "Docker image by https://oscarrc.me"
@@ -11,52 +12,56 @@ sleep 10
 echo "SETTING CONFIGURATION"
 echo "----------------------------------------"
 
-configfile = "/etc/lynx/lynx.conf"
-datadir = "/lynx"
+configfile="/etc/lynx/lynx.conf"
+datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
 
-if [[ -f /lynx/lynx.conf ]]; then
-    $configfile = "/$datadir/lynx.conf"
+if [[ -f "${datadir}/lynx.conf" ]]; then
+    datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
+    configfile="${datadir}/lynx.conf"
 else
     echo "No config file found. Starting Lynx with default config."
 fi
+
+echo "DONE."
 
 echo "----------------------------------------"
 echo "BOOTSTRAPING BLOCKCHAIN DATA"
 echo "----------------------------------------"
 
-isTestnet = "$(grep -i "^ *testnet *= *1" $configfile)"
-chainstate="$(ls /$datadir/chainstate 2> /dev/null | wc -l)"
-blocks="$(ls /$datadir/blocks 2> /dev/null | wc -l)"
+isTestnet="$(grep -i "^ *testnet=1" ${configfile} | cut -d '=' -f2)"
+chainstate="$(ls ${datadir}/chainstate 2> /dev/null | wc -l)"
+blocks="$(ls ${datadir}/blocks 2> /dev/null | wc -l)"
 currentDate="$(date +%F)"
 
-if [[ isTestnet ]]; then
+if [[ isTestnet -eq 1 ]]; then
     echo "Testnet detected. Starting with testnet data."
-    $datadir = "/lynx/testnet4"
-    $chainstate="$(ls /$datadir/chainstate | wc -l)"
-    $blocks="$(ls /$datadir/blocks | wc -l)"
+    mkdir -p "$datadir/testnet4"
+    datadir="$datadir/testnet4"
+    chainstate="$(ls ${datadir}/chainstate | wc -l)"
+    blocks="$(ls ${datadir}/blocks | wc -l)"
 fi
 
 if [[ $chainstate -le 0 ]]; then
     wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/chainstate.tar.gz -P /tmp -q --show-progress --progress=bar:force
     echo "Unpacking chain state..."
-    mkdir -p $datadir && tar -xzf /tmp/chainstate.tar.gz -C $datadir
+    tar -xzf /tmp/chainstate.tar.gz -C $datadir
 fi
 
 if [[ $blocks -le 0 ]]; then
     wget https://github.com/getlynx/LynxBootstrap/releases/download/v5.0-mainnet/blocks.tar.gz -P /tmp -q --show-progress --progress=bar:force
     echo "Unpacking blocks..."
-    mkdir -p $datadir && tar -xzf /tmp/blocks.tar.gz -C $datadir
+    tar -xzf /tmp/blocks.tar.gz -C $datadir
 fi
 
-sudo rm -rf /tmp/*
+echo "DONE."
 
 echo "----------------------------------------"
 echo "STARTING LYNX"
 echo "----------------------------------------"
 
-[[ -f /lynx/debug.log ]] || touch /lynx/debug.log
-tail -f /lynx/debug.log &
+[[ -f "${datadir}/debug.log" ]] || touch $datadir/debug.log
+tail -f $datadir/debug.log &
+echo "DONE. HAVE FUN!"
 lynxd -conf=$configfile
 
 echo "----------------------------------------"
-echo "DONE. HAVE FUN!"
