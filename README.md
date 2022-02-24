@@ -22,9 +22,12 @@ Based on ubuntu:latest
 
 * `/lynx` - Default Lynx data directory. It may contain a lynx.conf file.
 
-    > **Note:** If you want peresistency make sure to mount whatever volume you've defined as `datadir` in your `lynx.conf`.
-
 ### Tags:
 
 * `linux/amd64` - Linux 64bit
 * `linux/arm/v7` - Linux arm v7	
+* `linux/arm64/v8` - Linux arm v8 64bit
+
+### Configuration:
+
+Refer to the lynx.conf file to configure Lynx behavior. By default, bootstraping is enabled. You might want to disable it after the first run setting `bootstrap=0`. If not set, or commented it will be enabled.
