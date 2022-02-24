@@ -3,6 +3,9 @@ name: BuildLynxDocker
 on:
   push:
     branches: master
+    paths-ignore:
+      - 'README.md'
+      - '.github'
 
 jobs:
   build:
