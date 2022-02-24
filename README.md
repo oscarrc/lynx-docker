@@ -26,7 +26,9 @@
 
 * `/lynx` - Default Lynx data directory. It may contain a lynx.conf file.
 
-### Tags:
+---
+
+### Architectures:
 
 * `linux/amd64` - Linux 64bit
 * `linux/arm/v7` - Linux arm v7	
