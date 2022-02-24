@@ -40,7 +40,7 @@
 
 ### Configuration:
 
-To configure Lynx behavior you must place a lynx.conf file in the `/lynx` directory. Refer to the lynx.conf file to see all the options. 
+To configure Lynx behavior you must place a lynx.conf file in the `/lynx` directory. Refer to [the default lynx.conf file](https://github.com/oscarrc/lynx-docker/blob/master/lynx.conf) to see all the options. 
 
 
 By default, bootstraping is enabled. You might want to disable it after the first run setting `bootstrap=0`. If not set, or commented it will be enabled.
