@@ -50,18 +50,20 @@ You can use the following docker compose file to run the container.
 
 ```yaml
 version: '3'
-image: oscarrcweb/lynx:latest
-container_name: lynx
-volumes:
-  - lynx:/lynx
-ports:
-    - 22566:22566
-    - 9332:9332
-    - 44566:44566 # Testnet
-    - 19332:19332 # Testnet RPC
-environment:
-    - release=v7.0-mainnet
-    - testrelease=v4.0-testnet
+services:
+  lynx:
+    image: oscarrcweb/lynx:latest
+    container_name: lynx
+    volumes:
+      - /srv/dev-disk-by-uuid-fa87d802-a28d-4f13-b7b6-e0a97fe1abf3/lynx:/lynx
+    ports:
+      - 22566:22566
+      - 9332:9332
+      - 44566:44566 # Testnet
+      - 19332:19332 # Testnet RPC
+    environment:
+      - release=v7.0-mainnet
+      - testrelease=v4.0-testnet
 ```
 
 ---
