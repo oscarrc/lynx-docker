@@ -1,4 +1,4 @@
-name: BuildLynxDocker
+name: build
 
 on:
   push:
