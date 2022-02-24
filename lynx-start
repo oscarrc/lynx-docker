@@ -38,11 +38,13 @@ echo "--------------------------------------------------------------------------
 isTestnet="$(grep -i "^ *testnet=1" ${configfile} | cut -d '=' -f2)"
 isBootstrap="$(grep -i "^ *bootstrap=1" ${configfile} | cut -d '=' -f2)"
 bootstrap="https://github.com/getlynx/LynxBootstrap/releases/download/$release"
+bootstrapdir=$datadir
 currentDate="$(date +%F)"
 
 # If testnet enabled, then set variables accordingly
 if [[ isTestnet -eq 1 ]]; then
     echo "Lynx-Docker: Testnet enabled. Starting with testnet data."
+    bootstrapdir=testnet$(echo "$testrelease" | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//')
     bootstrap="https://github.com/getlynx/LynxBootstrap/releases/download/$testrelease"
 fi
 
@@ -73,9 +75,8 @@ if [[ isBootstrap -ne 0 ]]; then
 
     # Uncompress them
     echo "Lynx-Docker: Extracting files..."
-    [ isTestnet == 1 ] && extractdir=testnet$(echo "v4.0-testnet" | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//') || extractdir=$datadir
-    cat /tmp/*blocks.tar.gz.* | gunzip | (rm -rf $extractdir/blocks && mkdir -p $extractdir/blocks && cd $extractdir/blocks && tar xf -)
-    cat /tmp/*chainstate.tar.gz.* | gunzip | (rm -rf $extractdir/chainstate && mkdir -p $datadir/chainstate && cd $extractdir/chainstate && tar xf -)
+    cat /tmp/*blocks.tar.gz.* | gunzip | (rm -rf $bootstrapdir/blocks && mkdir -p $bootstrapdir/blocks && cd $bootstrapdir/blocks && tar xf -)
+    cat /tmp/*chainstate.tar.gz.* | gunzip | (rm -rf $bootstrapdir/chainstate && mkdir -p $bootstrapdir/chainstate && cd $bootstrapdir/chainstate && tar xf -)
 
     echo "Lynx-Docker: Bootstrap complete."
 else
