@@ -12,7 +12,7 @@
 
 ### Enviromental variables:
 * `release=<vX.x-mainnet>`: release version to bootstrap (default: v7.0-mainnet)
-* `testrelease=<vX.x-mainnet>`: release version to bootstrap testnet (default: v4.0-testnet)
+* `testrelease=<vX.x-testnet>`: release version to bootstrap testnet (default: v4.0-testnet)
 
     > **Note:** See the [releases page](https://github.com/getlynx/LynxBootstrap/releases) for the latest release.
 
@@ -38,9 +38,8 @@
 
 ### Configuration:
 
-Refer to the lynx.conf file to see all the options. 
+To configure Lynx behavior you must place a lynx.conf file in the `/lynx` directory. Refer to the lynx.conf file to see all the options. 
 
-To configure Lynx behavior you must place a lynx.conf file in the `/lynx` directory.
 
 By default, bootstraping is enabled. You might want to disable it after the first run setting `bootstrap=0`. If not set, or commented it will be enabled.
 
