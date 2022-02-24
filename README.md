@@ -55,7 +55,7 @@ services:
     image: oscarrcweb/lynx:latest
     container_name: lynx
     volumes:
-      - /srv/dev-disk-by-uuid-fa87d802-a28d-4f13-b7b6-e0a97fe1abf3/lynx:/lynx
+      - - /path/to/lynx/folder:/lynx
     ports:
       - 22566:22566
       - 9332:9332
