@@ -44,7 +44,7 @@ currentDate="$(date +%F)"
 # If testnet enabled, then set variables accordingly
 if [[ isTestnet -eq 1 ]]; then
     echo "Lynx-Docker: Testnet enabled. Starting with testnet data."
-    bootstrapdir=testnet$(echo "$testrelease" | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//')
+    bootstrapdir=${datadir}/testnet$(echo "$testrelease" | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//')
     bootstrap="https://github.com/getlynx/LynxBootstrap/releases/download/$testrelease"
 fi
 
