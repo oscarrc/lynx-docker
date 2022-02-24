@@ -64,6 +64,7 @@ services:
     environment:
       - release=v7.0-mainnet
       - testrelease=v4.0-testnet
+    restart: always
 ```
 
 ---
