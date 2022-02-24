@@ -8,6 +8,8 @@
 
 [See on Docker Hub](https://hub.docker.com/r/oscarrcweb/lynx).
 
+[![BuildLynxDocker](https://github.com/oscarrc/lynx-docker/actions/workflows/image.yml/badge.svg?branch=master)](https://github.com/oscarrc/lynx-docker/actions/workflows/image.yml)
+
 ---
 
 ### Enviromental variables:
