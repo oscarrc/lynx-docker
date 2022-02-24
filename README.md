@@ -4,7 +4,9 @@
 
 ## A Docker container for [LYNX](https://getlynx.io/).
 
-Based on ubuntu:latest
+### Based on Ubuntu:latest
+
+---
 
 ### Enviromental variables:
 * `release=<vX.x-mainnet>`: release version to bootstrap (default: v7.0-mainnet)
@@ -28,6 +30,40 @@ Based on ubuntu:latest
 * `linux/arm/v7` - Linux arm v7	
 * `linux/arm64/v8` - Linux arm v8 64bit
 
+---
+
 ### Configuration:
 
-Refer to the lynx.conf file to configure Lynx behavior. By default, bootstraping is enabled. You might want to disable it after the first run setting `bootstrap=0`. If not set, or commented it will be enabled.
+Refer to the lynx.conf file to see all the options. 
+
+To configure Lynx behavior you must place a lynx.conf file in the `/lynx` directory.
+
+By default, bootstraping is enabled. You might want to disable it after the first run setting `bootstrap=0`. If not set, or commented it will be enabled.
+
+---
+
+### Docker compose
+
+You can use the following docker compose file to run the container.
+
+```yaml
+version: '3'
+image: oscarrcweb/lynx:latest
+container_name: lynx
+volumes:
+  - lynx:/lynx
+ports:
+    - 22566:22566
+    - 9332:9332
+    - 44566:44566 # Testnet
+    - 19332:19332 # Testnet RPC
+environment:
+    - release=v7.0-mainnet
+    - testrelease=v4.0-testnet
+```
+
+---
+
+### Security
+
+If you came from LynxCI, you should know their install script does some security / firewall stuff. That doesn't apply for a Docker container so you should configure it yourself.
