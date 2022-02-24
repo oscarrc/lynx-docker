@@ -6,7 +6,7 @@
 
 ### Based on Ubuntu:latest
 
-[See on Docker Hub](https://hub.docker.com/repository/docker/oscarrcweb/lynx).
+[See on Docker Hub](https://hub.docker.com/r/oscarrcweb/lynx).
 
 ---
 
