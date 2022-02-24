@@ -31,9 +31,6 @@ else
     echo "Lynx-Docker: No config file found. Starting Lynx with default config."
 fi
 
-# Datadir from config file
-datadir="$(grep -i "^ *datadir=" ${configfile} | cut -d '=' -f2)"
-
 echo "---------------------------------------------------------------------------"
 echo "BOOTSTRAPING BLOCKCHAIN DATA"
 echo "---------------------------------------------------------------------------"
@@ -46,7 +43,6 @@ blocks="$(ls ${datadir}/blocks 2> /dev/null | wc -l)"
 currentDate="$(date +%F)"
 
 # If testnet enabled, then set variables accordingly
-# TODO: testnet director is testnet4, I've to get it from somewhere
 if [[ isTestnet -eq 1 ]]; then
     echo "Lynx-Docker: Testnet enabled. Starting with testnet data."
     mkdir -p "$datadir/$testrelease"
