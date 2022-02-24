@@ -79,6 +79,7 @@ if [[ isBootstrap -ne 0 ]]; then
 
     # Uncompress them
     echo "Lynx-Docker: Extracting files..."
+    [ isTestnet == 1 ] && extractdir=testnet$(echo "v4.0-testnet" | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//') || extractdir=$datadir
     cat /tmp/*blocks.tar.gz.* | gunzip | (rm -rf $datadir/blocks && mkdir -p $datadir/blocks && cd $datadir/blocks && tar xf -)
     cat /tmp/*chainstate.tar.gz.* | gunzip | (rm -rf $datadir/chainstate && mkdir -p $datadir/chainstate && cd $datadir/chainstate && tar xf -)
 

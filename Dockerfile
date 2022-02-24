@@ -1,5 +1,7 @@
 FROM ubuntu:latest
-ARG arch=linux64
+ARG TARGETARCH
+ARG TARGETVERSION="0.16.3.12"
+SHELL ["/bin/bash", "-c"]
 RUN apt update && \
     apt install wget tar libssl-dev ca-certificates cron libpopt0 logrotate --no-install-recommends -y && \
     apt clean && \
@@ -7,18 +9,22 @@ RUN apt update && \
     usermod -aG sudo lynx && \
     rm -rf /var/lib/apt/lists/*
 RUN su lynx && \
-    wget https://github.com/getlynx/Lynx/releases/download/v0.16.3.12/lynx-$arch-wallet-0.16.3.12.tar.gz -P /tmp && \
-    tar -zxvf "/tmp/lynx-${arch}-wallet-0.16.3.12.tar.gz" -C /tmp && \
-    mv /tmp/lynx-$arch-wallet-0.16.3.12/* /usr/local/bin && \
+    if [ "$TARGETARCH" == "amd64" ]; then \
+        ARCH="linux64"; \
+    elif [[ "$TARGETARCH" =~ "arm" ]]; then \
+        ARCH="arm32"; \
+    else \
+        echo "Not compatible" && exit 1; \
+    fi && \
+    wget https://github.com/getlynx/Lynx/releases/download/v$TARGETVERSION/lynx-$ARCH-wallet-$TARGETVERSION.tar.gz --no-check-certificate -P /tmp && \
+    tar -zxvf "/tmp/lynx-${ARCH}-wallet-${TARGETVERSION}.tar.gz" -C /tmp && \
+    mv /tmp/lynx-$ARCH-wallet-$TARGETVERSION/* /usr/local/bin && \
     mkdir /etc/lynx/ /lynx && \
     rm -rf /tmp/*
-ADD lynx-start /usr/local/bin/lynx-start 
-ADD lynx.conf /etc/lynx/lynx.conf
-ADD lynx-pi.conf /etc/lynx/lynx-pi.conf
+ADD --chown=lynx:lynx lynx-start /usr/local/bin/lynx-start 
+ADD --chown=lynx:lynx lynx*.conf /etc/lynx
 ADD logrotate /etc/logrotate.d/lynx
 RUN chown lynx:lynx /usr/local/bin/lynx* && \
-    chown lynx:lynx /lynx && \
-    chown -R lynx:lynx /etc/lynx && \
     chmod 700 /usr/local/bin/lynx* && \
     chmod 644 /etc/logrotate.d/lynx
 VOLUME /lynx
