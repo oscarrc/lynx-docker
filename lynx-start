@@ -49,7 +49,9 @@ if [[ isTestnet -eq 1 ]]; then
 fi
 
 # If bootstrap enabled, then bootstrap
-if [[ isBootstrap -ne 0 ]]; then
+if [[ isBootstrap -ne 0 ]] || [ -z "$isBootstrap" ]; then
+    echo "Lynx-Docker: Bootstrap enabled. Starting with bootstrap data."
+
     rm -rf $datadir/manifest.txt # Remove old manifest
     wget -q $bootstrap/manifest.txt -P $datadir # Download new manifest
     sed -i 's/  /:/' $datadir/manifest.txt # Clean manifest
@@ -72,6 +74,11 @@ if [[ isBootstrap -ne 0 ]]; then
             exit
         fi
     done < $datadir/manifest.txt
+
+    # Disable bootstrap for next runs        
+    echo "Lynx-Docker: Bootstrap has been disabled for subsequent runs."
+    echo "Lynx-Docker: If you want, you can reenable it by editing ${configfile}."    
+    sed -i 's/^.*bootstrap=.*/bootstrap=0/g' ${configfile}
 
     # Uncompress them
     echo "Lynx-Docker: Extracting files..."
@@ -103,10 +110,5 @@ sleep 1
 
 # Start Lynx using config file
 lynxd -conf=$configfile -datadir=$datadir -daemon=0 -debuglogfile=$datadir/debug.log
-
-while true;
-do
-    sleep 1
-done
 
 echo "---------------------------------------------------------------------------" 
