@@ -36,7 +36,7 @@ echo "BOOTSTRAPING BLOCKCHAIN DATA"
 echo "---------------------------------------------------------------------------"
 
 isTestnet="$(grep -i "^ *testnet=1" ${configfile} | cut -d '=' -f2)"
-isBootstrap="$(grep -i "^ *bootstrap=1" ${configfile} | cut -d '=' -f2)"
+isBootstrap="$(grep -i "^ *bootstrap=" ${configfile} | cut -d '=' -f2)"
 bootstrap="https://github.com/getlynx/LynxBootstrap/releases/download/$release"
 bootstrapdir=$datadir
 currentDate="$(date +%F)"
