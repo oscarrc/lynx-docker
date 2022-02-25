@@ -26,7 +26,7 @@
 
 ### Volumes:
 
-* `/lynx` - Default Lynx data directory. It may contain a lynx.conf file.
+* `/lynx` - Default Lynx data directory. It may contain [a lynx.conf file](https://github.com/oscarrc/lynx-docker/blob/master/lynx.conf).
 
 ---
 
