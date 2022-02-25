@@ -24,7 +24,7 @@ RUN su lynx && \
 ADD --chown=lynx:lynx lynx-start /usr/local/bin/lynx-start 
 ADD --chown=lynx:lynx lynx*.conf /etc/lynx
 ADD logrotate /etc/logrotate.d/lynx
-RUN chown lynx:lynx /usr/local/bin/lynx* && \
+RUN chown lynx:lynx /usr/local/bin/lynx* /lynx && \
     chmod 700 /usr/local/bin/lynx* && \
     chmod 644 /etc/logrotate.d/lynx
 VOLUME /lynx

@@ -104,4 +104,9 @@ sleep 1
 # Start Lynx using config file
 lynxd -conf=$configfile -datadir=$datadir -daemon=0 -debuglogfile=$datadir/debug.log
 
+while true;
+do
+    sleep 1
+done
+
 echo "---------------------------------------------------------------------------" 
