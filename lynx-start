@@ -10,6 +10,9 @@ sleep 5
 echo "SETTING CONFIGURATION"
 echo "---------------------------------------------------------------------------"
 
+# Testnet build
+testnetbuild=4
+
 # Checks if the device is Raspberry Pi
 [ "$(grep 'Revision' /proc/cpuinfo)" != "" ] && isPi="1" || isPi="0"
 
@@ -44,7 +47,7 @@ currentDate="$(date +%F)"
 # If testnet enabled, then set variables accordingly
 if [[ isTestnet -eq 1 ]]; then
     echo "Lynx-Docker: Testnet enabled. Starting with testnet data."
-    bootstrapdir=${datadir}/testnet$(echo "$testrelease" | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//')
+    bootstrapdir=${datadir}/testnet${testnetbuild}
     bootstrap="https://github.com/getlynx/LynxBootstrap/releases/download/$testrelease"
 fi
 
