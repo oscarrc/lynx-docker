@@ -57,7 +57,7 @@ services:
     image: oscarrcweb/lynx:latest
     container_name: lynx
     volumes:
-      - - /path/to/lynx/folder:/lynx
+      - /path/to/lynx/folder:/lynx
     ports:
       - 22566:22566
       - 9332:9332
